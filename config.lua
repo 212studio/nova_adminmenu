@@ -66,11 +66,18 @@ Config.AdminGroup = {
 }
 
 Config.ClearAreaRadius = {
-    '100',
-    '200',
-    '300',
-    '400',
-    '500',
+    {
+        label = "100",
+        value = 100
+    },
+    {
+        label = "250",
+        value = 250
+    },
+    {
+        label = "500",
+        value = 500
+    }
 }
 
 Config.Trigger = {
@@ -402,7 +409,6 @@ Config.Lang = {
         ['annuncio'] = "ANNUNCIO",
         ['dmmessage'] = "MESSAGGIO PRIVATO",
         ['give_money_all'] = "DAI SOLDI A TUTTI",
-
         ['stato_nomitesta'] = "Stato Nomi Testa",
         ['stato_noclip'] = "Stato NoClip",
         ['stato_invisible'] = "Stato Invisibilità",
@@ -419,7 +425,30 @@ Config.Lang = {
         ['veicolo'] = "Veicolo",
         ['ripara_veicolo'] = "Ripara Veicolo",
         ['clear_area'] = "Clear Area",
-        ['exit_noclip'] = "Premi ~INPUT_23B4087C~ per uscire dal noclip"
+        ['exit_noclip'] = "Premi ~INPUT_23B4087C~ per uscire dal noclip",
+
+        ['noclip_attivato'] = "NoClip Attivato",
+        ['noclip_disattivato'] = "NoClip Disattivato",
+        ['revive'] = "Hai rianimato con successo!"
+        ['heal'] = "Hai curato con successo!",
+        ['clear_ped'] = "Il tuo ped è stato pulito con successo"
+        ['clear_ped2'] = "Hai pulito il ped con successo",
+        ['clear_area2'] = "Hai pulito la zona con successo",
+        ['repair_vehicle2'] = "Hai riparato il veicolo con successo",
+        ['delete_warn'] = "Hai eliminato il warn",
+        ['nomitesta_a'] = "Hai attivato i nomi sulla testa",
+        ['nomitesta_b'] = "Hai disattivato i nomi sulla testa",     
+        ['revoca_ban'] = "Hai revocato il ban",
+        ['kill'] = "Hai ucciso il player",
+        ['wipe'] = "Hai wipato il player"
+        ['clear_inv2'] = "Hai pulito l\'inventario del player",
+        ['jailato'] = "Hai messo in carcere il player",
+        ['unjailato'] = "Hai scarcerato il player",
+        ['invisibilita_a'] = "Hai attivato l\'invisibilità",
+        ['invisibilita_b'] = "Hai disattivato l\'invisibilità",
+        ['godmode_a'] = "Hai attivato la godmode",
+        ['godmode_b'] = "Hai disattivato la godmode",
+        ['revive_all'] = "Hai curato tutti"
     },
     ['en'] = {
         ['dashboard'] = "Dashboard",
