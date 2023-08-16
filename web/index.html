@@ -1,0 +1,651 @@
+<html>
+    <head>
+        <title></title>
+        <link rel="stylesheet" href="./css/style.css">
+    </head>
+    <body>
+
+        <div class="message">
+            <div class="titleMsg"></div>
+            <div class="subtitleMsg"></div>
+        </div>
+
+        <div id="app">
+
+            <div class="containerMenu">
+
+                <div class="bgcolor"></div>
+
+                <div class="leftBar">
+                    <div class="serverLogo"></div>
+
+                    <div class="containerOpzioni">
+                        <div @click="updateSelectedOption('dashboard')" id="opzionedashboard" class="opzione">
+                            <div style="background-image: url('./img/dashboard.png');" class="logoOpzione"></div>
+                            <div class="nomeOpzione">{{this.config.lang.dashboard}}</div>
+                        </div>
+                        <div @click="updateSelectedOption('listaplayer')" id="opzionelistaplayer" class="opzione">
+                            <div style="background-image: url('./img/lista_player.png');" class="logoOpzione"></div>
+                            <div class="nomeOpzione">{{this.config.lang.lista_player}}</div>
+                        </div>
+                        <div @click="updateSelectedOption('menupersonale')" id="opzionemenupersonale" class="opzione">
+                            <div style="background-image: url('./img/menu_personale.png');" class="logoOpzione"></div>
+                            <div class="nomeOpzione">{{this.config.lang.menu_personale}}</div>
+                        </div>
+                        <div @click="updateSelectedOption('listaban')" id="opzionelistaban" class="opzione">
+                            <div style="background-image: url('./img/lista_ban.png');" class="logoOpzione"></div>
+                            <div class="nomeOpzione">{{this.config.lang.lista_ban}}</div>
+                        </div>
+                        <div @click="close()" class="opzione">
+                            <div style="background-image: url('./img/logout.png');" class="logoOpzione"></div>
+                            <div class="nomeOpzione">{{this.config.lang.esci}}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <transition name="opacity">
+                    <div v-if="optionSelected=='dashboard'" class="paginaDestra">
+                        <div class="line"></div>
+                        <div class="welcome">{{this.config.lang.benvenuto}}</div>
+                        <div class="name">{{this.infoStaff.name}}</div>
+
+                        <div class="hour">{{orario}}</div>
+
+                        <div class="containerInfo">
+                            <div v-for="v in infoDashboard" v-bind:style="setBgFromInfo(v.img)" class="info">
+                                <div class="name">{{v.label}}</div>
+                                <div class="number">{{getValue(v.id)}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </transition>
+
+                <transition name="opacity">
+                    <div v-if="optionSelected=='listaplayer'" class="paginaDestra">
+                        <input v-model="findbyname" type="text" :placeholder="this.config.lang.search_name" class="search_name">
+
+                        <div class="containerPlayer">
+                            <div @click="infoUser(v.id)" v-for="v in filterByName()" v-bind:style="setPlayerBg(v)" class="player">
+                                <div class="name">{{v.name}} - {{v.id}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </transition>
+
+                <transition name="opacity">
+                    <div v-if="optionSelected=='listaban'" class="paginaDestra">
+                        <input v-model="findbyidban" type="text" :placeholder="this.config.lang.search_id" class="search_name">
+
+                        <div style="width: 80%; left: 50%; transform: translate(-50%);" class="containerPlayer">
+                            <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                    <thead class="text-xs text-gray-700 uppercase bg-[#d8d8d80d] dark:text-gray-400">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3">
+                                                {{this.config.lang.id_ban}}
+                                            </th>
+                                            <th scope="col" class="px-6 py-3">
+                                                {{this.config.lang.nome_staff}}
+                                            </th>
+                                            <th scope="col" class="px-6 py-3">
+                                                {{this.config.lang.nome_player}}
+                                            </th>
+                                            <th scope="col" class="px-6 py-3">
+                                                {{this.config.lang.motivo}}
+                                            </th>
+                                            <th scope="col" class="px-6 py-3">
+                                                {{this.config.lang.data}}
+                                            </th>
+                                            <th scope="col" class="px-6 py-3">
+                                                {{this.config.lang.scadenza}}
+                                            </th>
+                                            <th scope="col" class="px-6 py-3">
+                                                {{this.config.lang.stato}}
+                                            </th>
+                                            <th scope="col" class="px-6 py-3">
+                                                {{this.config.lang.azioni}}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(v,k) in filterByIdBan()" class="bg-white border-t dark:bg-[#d8d8d80d] dark:border-gray-700">
+                                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                {{v.idBan}}
+                                            </th>
+                                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                {{v.staff.name}}
+                                            </th>
+                                            <td class="px-6 py-4">
+                                                {{v.name}}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                {{v.reason}}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                {{v.dataBan}}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                {{v.labelScadenza}}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span v-if="v.valido == false">{{config.lang.scaduto}}</span>
+                                                <span v-else>{{config.lang.valido}}</span>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <a v-if="v.valido!=false" @click="revocaBan(v.idBan)" href="#" class="font-medium text-red-600 dark:text-red-500 hover:underline">{{config.lang.revoca}}</a>
+                                                <a v-else href="#" class="font-medium text-red-600 dark:text-red-500">{{config.lang.no_azione}}</a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </transition>
+
+                <transition name="opacity">
+                    <div class="paginaDestra" v-if="optionSelected=='menupersonale'">
+                        <div class="containerInfoPlayer">
+                            <div class="logo">
+                                <div @click="redirectPage(infoStaff.avatar)" v-bind:style="setImageLogo(true)" class="logo2"></div>
+                            </div>
+                            <div class="info">
+                                <span style="font-size: 2.3148vh;">{{infoStaff.name}} - {{infoStaff.id}}</span>
+                                <span>{{infoStaff.rankLabel}}</span>
+                                <span>{{infoStaff.job.label}} - {{infoStaff.job.grade_label}}</span>
+                                <span>{{this.config.lang.discord}}{{infoStaff.license.discord}} <i @click="copy('discord', true)"></i></span>
+                                <span>{{this.config.lang.steam}}{{infoStaff.license.steam}} <i @click="copy('steam', true)"></i></span>
+                                <span>{{this.config.lang.license}}{{infoStaff.license.license}} <i @click="copy('license', true)"></i></span>
+                            </div>
+                        </div>
+
+                        <div class="containerAzioniPlayer">
+                            <div class="containerListe">
+                                <div @click="viewList1('ban')" style="background-image: url('./img/banhistory.png');" class="lista">
+                                    <span>{{this.config.lang.lista_ban}}</span>
+                                </div>
+                                <div @click="viewList1('kick')" style="background-image: url('./img/kickhistory.png');" class="lista">
+                                    <span>{{this.config.lang.lista_kick}}</span>
+                                </div>
+                                <div @click="viewList1('jail')" style="background-image: url('./img/jailhistory.png');" class="lista">
+                                    <span>{{this.config.lang.lista_jail}}</span>
+                                </div>
+                                <div @click="viewList1('warn')" style="background-image: url('./img/warnhistory.png');" class="lista">
+                                    <span>{{this.config.lang.lista_warn}}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="containerAzioni">
+
+
+                                
+                                <div v-if="!viewList && infoStaff.rank >= v.rank" @click="azione(v.id)" v-bind:style="setBgFromInfo(v.image)" v-for="v in azioniPersonale"  class="azione">
+                                    <div class="nomeAzione">{{v.label}}</div>
+                                </div>
+
+
+                                <transition name="opacity">
+                                    <div v-if="viewList" style="position: absolute; top: 9.537vh; left: 5.8vh; height: 40vh; width: 112.6852vh; overflow-y: auto;">
+    
+                                        <div v-if="listType=='warn'" class="listaWarn">
+                                            <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                                                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                                    <thead class="text-xs text-gray-700 uppercase bg-[#d8d8d80d] dark:text-gray-400">
+                                                        <tr>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.nome_player}}
+                                                            </th>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.motivo}}
+                                                            </th>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.data}}
+                                                            </th>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.azioni}}
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="(v,k) in infoStaff.warn" class="bg-white border-t dark:bg-[#d8d8d80d] dark:border-gray-700">
+                                                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                                {{v.name}}
+                                                            </th>
+                                                            <td class="px-6 py-4">
+                                                                {{v.reason}}
+                                                            </td>
+                                                            <td class="px-6 py-4">
+                                                                {{v.date}}
+                                                            </td>
+                                                            <td class="px-6 py-4">
+                                                                <a @click="deleteWarn(k)" href="#" class="font-medium text-red-600 dark:text-red-500 hover:underline">{{config.lang.elimina}}</a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+    
+                                        <div v-if="listType=='kick'" class="listaWarn">
+                                                <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                                                    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                                        <thead class="text-xs text-gray-700 uppercase bg-[#d8d8d80d] dark:text-gray-400">
+                                                            <tr>
+                                                                <th scope="col" class="px-6 py-3">
+                                                                    {{this.config.lang.nome_player}}
+                                                                </th>
+                                                                <th scope="col" class="px-6 py-3">
+                                                                    {{this.config.lang.motivo}}
+                                                                </th>
+                                                                <th scope="col" class="px-6 py-3">
+                                                                    {{this.config.lang.data}}
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr v-for="(v,k) in infoStaff.kick" class="bg-white border-t dark:bg-[#d8d8d80d] dark:border-gray-700">
+                                                                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                                    {{v.name}}
+                                                                </th>
+                                                                <td class="px-6 py-4">
+                                                                    {{v.reason}}
+                                                                </td>
+                                                                <td class="px-6 py-4">
+                                                                    {{v.date}}
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                        </div>
+    
+                                        <div v-if="listType=='ban'" class="listaWarn">
+                                            <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                                                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                                    <thead class="text-xs text-gray-700 uppercase bg-[#d8d8d80d] dark:text-gray-400">
+                                                        <tr>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.nome_player}}
+                                                            </th>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.motivo}}
+                                                            </th>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.data}}
+                                                            </th>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.scadenza}}
+                                                            </th>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.id_ban}}
+                                                            </th>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.stato}}
+                                                            </th>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.azioni}}
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="(v,k) in infoStaff.ban" class="bg-white border-t dark:bg-[#d8d8d80d] dark:border-gray-700">
+                                                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                                {{v.name}}
+                                                            </th>
+                                                            <td class="px-6 py-4">
+                                                                {{v.reason}}
+                                                            </td>
+                                                            <td class="px-6 py-4">
+                                                                {{v.date}}
+                                                            </td>
+                                                            <td class="px-6 py-4">
+                                                                {{v.scadenzaLabel}}
+                                                            </td>
+                                                            <td class="px-6 py-4">
+                                                                {{v.idBan}}
+                                                            </td>
+                                                            <td class="px-6 py-4">
+                                                                <span v-if="v.valido == false">{{config.lang.scaduto}}</span>
+                                                                <span v-else>{{config.lang.valido}}</span>
+                                                            </td>
+                                                            <td class="px-6 py-4">
+                                                                <a v-if="v.valido!=false" @click="revocaBan(v.idBan)" href="#" class="font-medium text-red-600 dark:text-red-500 hover:underline">{{config.lang.revoca}}</a>
+                                                                <a v-else href="#" class="font-medium text-red-600 dark:text-red-500">{{config.lang.no_azione}}</a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+    
+                                        <div v-if="listType=='jail'" class="listaWarn">
+                                            <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                                                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                                    <thead class="text-xs text-gray-700 uppercase bg-[#d8d8d80d] dark:text-gray-400">
+                                                        <tr>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.nome_player}}
+                                                            </th>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.motivo}}
+                                                            </th>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.data}}
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="(v,k) in infoStaff.jail" class="bg-white border-t dark:bg-[#d8d8d80d] dark:border-gray-700">
+                                                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                                {{v.name}}
+                                                            </th>
+                                                            <td class="px-6 py-4">
+                                                                {{v.reason}}
+                                                            </td>
+                                                            <td class="px-6 py-4">
+                                                                {{v.date}}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    
+    
+                                    </div>
+                                    
+                                    </transition>
+                            </div>
+
+                            <transition name="question">
+                                <div v-if="viewTwoQuestionInput" style="height: 100%; overflow: scroll; width: 100%;" class="shit">
+                                    <div class="question" style="height: 79%; width: 100%; position: absolute" v-bind:style="setQuestionInformation()" id="questiontwoinput">
+                                        <div class="title">{{this.questionInfo.title}}</div>
+                                        <input v-if="this.questionInfo.input1.type!='select'" :type="this.questionInfo.input1.type" class="value1" :placeholder="this.questionInfo.input1.placeholder">
+
+                                        <select v-if="this.questionInfo.input1.type=='select'" class="value1">
+                                            <option disabled hidden selected>{{this.config.lang.seleziona_opzione}}</option>
+                                            <option v-for="v in this.questionInfo.input1.options" :value="v.value">{{v.label}}</option>
+                                          </select>
+
+                                        <input v-if="this.questionInfo.input2.type!='select'" :type="this.questionInfo.input2.type" class="value2" :placeholder="this.questionInfo.input2.placeholder">
+
+                                        
+                                        <div @click="confirmAction()" class="confirm"><span>{{this.config.lang.confirm}}</span></div>
+                                        <div @click="closeQuestion()" class="cancel"><span>{{this.config.lang.cancel}}</span></div>
+                                    </div>
+                                </div>
+
+                                <div v-if="viewOneQuestionInput" style="height: 100%; overflow: scroll; width: 100%;" class="shit">
+                                    <div class="question" style="height: 79%; width: 100%; position: absolute" v-bind:style="setQuestionInformation()" id="questiontwoinput">
+                                        <div class="title">{{this.questionInfo.title}}</div>
+                                        <input style="position: absolute; left: 50%; transform: translate(-50%);" v-if="this.questionInfo.input1.type!='select'" :type="this.questionInfo.input1.type" class="value1" :placeholder="this.questionInfo.input1.placeholder">
+
+                                        <select v-if="this.questionInfo.input1.type=='select'" style="position: absolute; left: 50%; transform: translate(-50%);" class="value1">
+                                            <option disabled hidden selected>{{this.config.lang.seleziona_opzione}}</option>
+                                            <option v-for="v in this.questionInfo.input1.options" :value="v.value">{{v.label}}</option>
+                                          </select>
+
+                                        
+                                          <div @click="confirmAction()" class="confirm"><span>{{this.config.lang.confirm}}</span></div>
+                                          <div @click="closeQuestion()" class="cancel"><span>{{this.config.lang.cancel}}</span></div>
+                                    </div>
+                                </div>
+                            </transition>
+                        </div>
+                    </div>
+                </transition>
+
+                <transition name="opacity">
+                    <div v-if="optionSelected=='infopersona'" class="paginaDestra">
+                        <div class="containerInfoPlayer">
+                            <div class="logo">
+                                <div @click="redirectPage(playerSelected.avatar)" v-bind:style="setImageLogo()" class="logo2"></div>
+                            </div>
+                            <div class="info">
+                                <span style="font-size: 2.3148vh;">{{playerSelected.name}} - {{playerSelected.id}}</span>
+                                <span>{{playerSelected.rankLabel}}</span>
+                                <span>{{playerSelected.job.label}} - {{playerSelected.job.grade_label}}</span>
+                                <span>{{this.config.lang.discord}}{{playerSelected.license.discord}} <i @click="copy('discord')"></i></span>
+                                <span>{{this.config.lang.steam}}{{playerSelected.license.steam}} <i @click="copy('steam')"></i></span>
+                                <span>{{this.config.lang.license}}{{playerSelected.license.license}} <i @click="copy('license')"></i></span>
+                            </div>
+                        </div>
+
+                        <div class="containerAzioniPlayer">
+                            
+                            <div class="containerListe">
+                                <div @click="viewList1('ban')" style="background-image: url('./img/banhistory.png');" class="lista">
+                                    <span>{{this.config.lang.lista_ban}}</span>
+                                </div>
+                                <div @click="viewList1('kick')" style="background-image: url('./img/kickhistory.png');" class="lista">
+                                    <span>{{this.config.lang.lista_kick}}</span>
+                                </div>
+                                <div @click="viewList1('jail')" style="background-image: url('./img/jailhistory.png');" class="lista">
+                                    <span>{{this.config.lang.lista_jail}}</span>
+                                </div>
+                                <div @click="viewList1('warn')" style="background-image: url('./img/warnhistory.png');" class="lista">
+                                    <span>{{this.config.lang.lista_warn}}</span>
+                                </div>
+                            </div>
+
+                            <div class="containerAzioni">
+                                <div v-if="!viewList && infoStaff.rank >= v.rank" @click="azione(v.id)" v-bind:style="setBgFromInfo(v.image)" v-for="v in azioni"  class="azione">
+                                    <div class="nomeAzione">{{v.label}}</div>
+                                </div>
+
+                                <transition name="opacity">
+                                <div v-if="viewList" style="position: absolute; top: 9.537vh; left: 5.8vh; height: 40vh; width: 112.6852vh; overflow-y: auto;">
+
+                                    <div v-if="listType=='warn'" class="listaWarn">
+                                        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                                <thead class="text-xs text-gray-700 uppercase bg-[#d8d8d80d] dark:text-gray-400">
+                                                    <tr>
+                                                        <th scope="col" class="px-6 py-3">
+                                                            {{this.config.lang.nome_staff}}
+                                                        </th>
+                                                        <th scope="col" class="px-6 py-3">
+                                                            {{this.config.lang.motivo}}
+                                                        </th>
+                                                        <th scope="col" class="px-6 py-3">
+                                                            {{this.config.lang.data}}
+                                                        </th>
+                                                        <th scope="col" class="px-6 py-3">
+                                                            {{this.config.lang.azioni}}
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="(v,k) in playerSelected.warn" class="bg-white border-t dark:bg-[#d8d8d80d] dark:border-gray-700">
+                                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                            {{v.staff.name}}
+                                                        </th>
+                                                        <td class="px-6 py-4">
+                                                            {{v.reason}}
+                                                        </td>
+                                                        <td class="px-6 py-4">
+                                                            {{v.date}}
+                                                        </td>
+                                                        <td class="px-6 py-4">
+                                                            <a @click="deleteWarn(k)" href="#" class="font-medium text-red-600 dark:text-red-500 hover:underline">{{config.lang.elimina}}</a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="listType=='kick'" class="listaWarn">
+                                            <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                                                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                                    <thead class="text-xs text-gray-700 uppercase bg-[#d8d8d80d] dark:text-gray-400">
+                                                        <tr>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.nome_staff}}
+                                                            </th>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.motivo}}
+                                                            </th>
+                                                            <th scope="col" class="px-6 py-3">
+                                                                {{this.config.lang.data}}
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="(v,k) in playerSelected.kick" class="bg-white border-t dark:bg-[#d8d8d80d] dark:border-gray-700">
+                                                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                                {{v.staff.name}}
+                                                            </th>
+                                                            <td class="px-6 py-4">
+                                                                {{v.reason}}
+                                                            </td>
+                                                            <td class="px-6 py-4">
+                                                                {{v.date}}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                    </div>
+
+                                    <div v-if="listType=='ban'" class="listaWarn">
+                                        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                                <thead class="text-xs text-gray-700 uppercase bg-[#d8d8d80d] dark:text-gray-400">
+                                                    <tr>
+                                                        <th scope="col" class="px-6 py-3">
+                                                            {{this.config.lang.nome_staff}}
+                                                        </th>
+                                                        <th scope="col" class="px-6 py-3">
+                                                            {{this.config.lang.motivo}}
+                                                        </th>
+                                                        <th scope="col" class="px-6 py-3">
+                                                            {{this.config.lang.data}}
+                                                        </th>
+                                                        <th scope="col" class="px-6 py-3">
+                                                            {{this.config.lang.scadenza}}
+                                                        </th>
+                                                        <th scope="col" class="px-6 py-3">
+                                                            {{this.config.lang.id_ban}}
+                                                        </th>
+                                                        <th scope="col" class="px-6 py-3">
+                                                            {{this.config.lang.stato}}
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="(v,k) in playerSelected.ban" class="bg-white border-t dark:bg-[#d8d8d80d] dark:border-gray-700">
+                                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                            {{v.staff.name}}
+                                                        </th>
+                                                        <td class="px-6 py-4">
+                                                            {{v.reason}}
+                                                        </td>
+                                                        <td class="px-6 py-4">
+                                                            {{v.date}}
+                                                        </td>
+                                                        <td class="px-6 py-4">
+                                                            {{v.scadenzaLabel}}
+                                                        </td>
+                                                        <td class="px-6 py-4">
+                                                            {{v.idBan}}
+                                                        </td>
+                                                        <td class="px-6 py-4">
+                                                            <span v-if="v.valido == false">{{config.lang.scaduto}}</span>
+                                                            <span v-else>{{config.lang.valido}}</span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="listType=='jail'" class="listaWarn">
+                                        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                                <thead class="text-xs text-gray-700 uppercase bg-[#d8d8d80d] dark:text-gray-400">
+                                                    <tr>
+                                                        <th scope="col" class="px-6 py-3">
+                                                            {{this.config.lang.nome_staff}}
+                                                        </th>
+                                                        <th scope="col" class="px-6 py-3">
+                                                            {{this.config.lang.motivo}}
+                                                        </th>
+                                                        <th scope="col" class="px-6 py-3">
+                                                            {{this.config.lang.data}}
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="(v,k) in playerSelected.jail" class="bg-white border-t dark:bg-[#d8d8d80d] dark:border-gray-700">
+                                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                            {{v.staff.name}}
+                                                        </th>
+                                                        <td class="px-6 py-4">
+                                                            {{v.reason}}
+                                                        </td>
+                                                        <td class="px-6 py-4">
+                                                            {{v.date}}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                
+
+                                </div>
+                                
+                                </transition>
+
+                            </div>
+
+                            <transition name="question">
+                                <div v-if="viewTwoQuestionInput" style="height: 100%; overflow: scroll; width: 100%;" class="shit">
+                                    <div class="question" style="height: 79%; width: 100%; position: absolute" v-bind:style="setQuestionInformation()" id="questiontwoinput">
+                                        <div class="title">{{this.questionInfo.title}}</div>
+                                        <input v-if="this.questionInfo.input1.type!='select'" :type="this.questionInfo.input1.type" class="value1" :placeholder="this.questionInfo.input1.placeholder">
+
+                                        <select v-if="this.questionInfo.input1.type=='select'" class="value1">
+                                            <option disabled hidden selected>{{this.config.lang.seleziona_opzione}}</option>
+                                            <option v-for="v in this.questionInfo.input1.options" :value="v.value">{{v.label}}</option>
+                                          </select>
+
+                                        <input v-if="this.questionInfo.input2.type!='select'" :type="this.questionInfo.input2.type" class="value2" :placeholder="this.questionInfo.input2.placeholder">
+
+                                        
+                                        <div @click="confirmAction()" class="confirm"><span>{{this.config.lang.confirm}}</span></div>
+                                        <div @click="closeQuestion()" class="cancel"><span>{{this.config.lang.cancel}}</span></div>
+                                    </div>
+                                </div>
+
+                                <div v-if="viewOneQuestionInput" style="height: 100%; overflow: scroll; width: 100%;" class="shit">
+                                    <div class="question" style="height: 79%; width: 100%; position: absolute" v-bind:style="setQuestionInformation()" id="questiontwoinput">
+                                        <div class="title">{{this.questionInfo.title}}</div>
+                                        <input style="position: absolute; left: 50%; transform: translate(-50%);" v-if="this.questionInfo.input1.type!='select'" :type="this.questionInfo.input1.type" class="value1" :placeholder="this.questionInfo.input1.placeholder">
+
+                                        <select v-if="this.questionInfo.input1.type=='select'" style="position: absolute; left: 50%; transform: translate(-50%);" class="value1">
+                                            <option disabled hidden selected>{{this.config.lang.seleziona_opzione}}</option>
+                                            <option v-for="v in this.questionInfo.input1.options" :value="v.value">{{v.label}}</option>
+                                          </select>
+
+                                        
+                                          <div @click="confirmAction()" class="confirm"><span>{{this.config.lang.confirm}}</span></div>
+                                          <div @click="closeQuestion()" class="cancel"><span>{{this.config.lang.cancel}}</span></div>
+                                    </div>
+                                </div>
+                            </transition>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+        </div>
+        
+
+        <script src='https://code.jquery.com/jquery-3.1.1.min.js'></script>
+        <script src='https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js'></script>
+        <script src='https://cdn.tailwindcss.com'></script>
+        <script src="./js/script.js"></script>
+    </body>
+</html>

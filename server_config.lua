@@ -1,0 +1,35 @@
+ConfigServer = {}
+
+ConfigServer.Token = ""
+
+ConfigServer.Webhook = {
+    ban = "",
+    kick = "",
+    adminjail = "",
+    warn = "",
+    skinmenu = "",
+    spectate = "",
+    revive = "",
+    heal = "",
+    kill = "",
+    wipe = "",
+    goto1 = "",
+    bring = "",
+    giveitem = "",
+    givemoney = "",
+    setjob = "",
+    clearinventory = "",
+    giveadmin = "",
+    clearped = "",
+    sendmessage = "",
+    freeze = "",
+    noclip = "",
+    invisibilita = "",
+    godmode = "",
+    nomiplayer = "",
+    annuncio = "",
+    reviveall = "",
+    givemoneyall = "",
+    repairvehicle = "",
+    cleararea = "",
+}
