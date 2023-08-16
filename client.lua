@@ -42,6 +42,7 @@ if Config.Keybinds.nomitesta.enable then
         if SonoStaff() == false then return end
         nomiTesta = not nomiTesta
         if nomiTesta then 
+            ESX.ShowNotification(Config.Lang[Config.Language]["nomitesta_a"])
             fields = {
                 {
                   name = Config.Lang[Config.Language]['nome_staff'],
@@ -55,6 +56,7 @@ if Config.Keybinds.nomitesta.enable then
                 },
               }
         else
+            ESX.ShowNotification(Config.Lang[Config.Language]["nomitesta_b"])
             fields = {
                 {
                   name = Config.Lang[Config.Language]['nome_staff'],
@@ -76,6 +78,7 @@ end
 RegisterNUICallback('deletewarn', function(data)
     local id = data.id
     local index = data.index
+    ESX.ShowNotification(Config.Lang[Config.Language]["delete_warn"])
     TriggerServerEvent('ricky-admin:deletewarn', id, index)
 end)
 
@@ -94,74 +97,71 @@ postMessage = function(data)
     SendNUIMessage(data)
 end
 
-OpenAdminMenu = function()
-    ESX.TriggerServerCallback('ricky-admin:getPlayers', function(players)
-        ESX.TriggerServerCallback('ricky-admin:getJobs', function(jobs) 
-            ESX.TriggerServerCallback('ricky-admin:getInfoStaff', function(info)
-                ESX.TriggerServerCallback('ricky-admin:getOrario', function(orario)
-                    ESX.TriggerServerCallback('ricky-admin:getBan', function(ban) 
-                        ESX.TriggerServerCallback('ricky-admin:getAdminOnline', function(adminOnline) 
-                            ESX.TriggerServerCallback('ricky-admin:getAllKicks', function(kicksTotali) 
-                                if SonoStaff() == false then return end
-                                SetNuiFocus(true, true)
-                                postMessage({
-                                    type = "SET_RADIUS",
-                                    radius = Config.ClearAreaRadius
-                                })
-                                postMessage({
-                                    type = "SET_ADMIN_ONLINE",
-                                    admin = adminOnline
-                                })
-                                postMessage({
-                                    type = "SET_KICKS",
-                                    kicks = kicksTotali
-                                })
-                                postMessage({
-                                    type = "SET_CONFIG",
-                                    config = Config
-                                })
-                                postMessage({
-                                    type = "SET_BAN",
-                                    ban = ban
-                                })
-                                postMessage({
-                                    type = "SET_INFO_STAFF",
-                                    info = info
-                                })
-                                postMessage({
-                                    type = "SET_JOBS",
-                                    jobs = jobs
-                                })
-                                postMessage({
-                                    type = "SET_ADMIN_GROUPS",
-                                    groups = Config.AdminGroup
-                                })
-                                postMessage({
-                                    type = "SET_ORARIO",
-                                    orario = orario
-                                })
-                                postMessage({
-                                    type = "SET_AZIONI",
-                                    azioni = Config.Azioni
-                                })
-                                postMessage({
-                                    type = "SET_AZIONI_PERSONALE",
-                                    azioni = Config.AzioniPersonale
-                                })
-                                postMessage({
-                                    type = "OPEN",
-                                    players = players
-                                })
-                                postMessage({
-                                    type = "SET_SERVER_LOGO",
-                                    logo = Config.LogoServer
-                                })
-                            end)
-                        end)
-                    end) 
-                end)
-            end)
+CreateThread(function()
+    while true do
+        ESX.TriggerServerCallback('ricky-admin:getPlayers', function(t)
+            players = t
         end)
+        Wait(30000)
+    end
+end)
+
+OpenAdminMenu = function()
+    ESX.TriggerServerCallback('ricky-admin:getData', function(data)
+        if SonoStaff() == false then return end
+        SetNuiFocus(true, true)
+        postMessage({
+            type = "SET_RADIUS",
+            radius = Config.ClearAreaRadius
+        })
+        postMessage({
+            type = "SET_ADMIN_ONLINE",
+            admin = data.adminOnline
+        })
+        postMessage({
+            type = "SET_KICKS",
+            kicks = data.kicks
+        })
+        postMessage({
+            type = "SET_CONFIG",
+            config = Config
+        })
+        postMessage({
+            type = "SET_BAN",
+            ban = data.bans
+        })
+        postMessage({
+            type = "SET_INFO_STAFF",
+            info = data.infoStaff
+        })
+        postMessage({
+            type = "SET_JOBS",
+            jobs = data.jobs
+        })
+        postMessage({
+            type = "SET_ADMIN_GROUPS",
+            groups = Config.AdminGroup
+        })
+        postMessage({
+            type = "SET_ORARIO",
+            orario = data.orario
+        })
+        postMessage({
+            type = "SET_AZIONI",
+            azioni = Config.Azioni
+        })
+        postMessage({
+            type = "SET_AZIONI_PERSONALE",
+            azioni = Config.AzioniPersonale
+        })
+        postMessage({
+            type = "OPEN",
+            players = players
+        })
+        postMessage({
+            type = "SET_SERVER_LOGO",
+            logo = Config.LogoServer
+        })
     end)
 end
 
@@ -222,15 +222,27 @@ RegisterNUICallback('repairvehicle', function()
           }
 
         TriggerServerEvent('ricky-admin:webhook', Config.Lang[Config.Language]["ripara_veicolo"], fields, "repairvehicle")
+        ESX.ShowNotification(Config.Lang[Config.Language]["repair_vehicle2"])
     end
 end)
 
 RegisterNetEvent('ricky-admin:cleararea')
 AddEventHandler('ricky-admin:cleararea', function(radius)
-    radius = tonumber(radius)
     local ped = PlayerPedId()
     local pos = GetEntityCoords(ped)
-    ClearAreaLeaveVehicleHealth(pos.x, pos.y, pos.z, radius, false, false, false, false)
+    local vehicles = ESX.Game.GetVehiclesInArea(pos, tonumber(radius))
+    for k,v in pairs(vehicles) do 
+        ESX.Game.DeleteVehicle(v)
+    end
+
+    ClearAreaOfVehicles(pos.x, pos.y, pos.z, radius, false, false, false, false, false)
+    ClearAreaOfPeds(pos.x, pos.y, pos.z, radius, 1)
+    ClearAreaOfObjects(pos.x, pos.y, pos.z, radius, 1)
+    ClearAreaOfCops(pos.x, pos.y, pos.z, radius, 1)
+    ClearAreaOfProjectiles(pos.x, pos.y, pos.z, radius, 1)
+    ClearAreaOfEverything(pos.x, pos.y, pos.z, radius, 1)
+
+
     local fields = {
         {
           name = Config.Lang[Config.Language]['nome_staff'],
@@ -240,11 +252,13 @@ AddEventHandler('ricky-admin:cleararea', function(radius)
       }
 
     TriggerServerEvent('ricky-admin:webhook', Config.Lang[Config.Language]["clear_area"], fields, "cleararea")
+    ESX.ShowNotification(Config.Lang[Config.Language]["clear_area2"])
 end)
 
 RegisterNUICallback('clearped', function(data)
     local id = data.id
     TriggerServerEvent('ricky-admin:clearped', id)
+    ESX.ShowNotification(Config.Lang[Config.Language]["clear_ped2"])
 end)
 
 RegisterNetEvent('ricky-admin:clearped')
@@ -252,6 +266,7 @@ AddEventHandler('ricky-admin:clearped', function()
     local ped = PlayerPedId()
     ClearPedTasksImmediately(ped)
     ClearPedBloodDamage(ped)
+    ESX.ShowNotification(Config.Lang[Config.Language]["clear_ped"])
 end)
 
 Citizen.CreateThread(function()
@@ -357,11 +372,13 @@ end
 RegisterNUICallback('heal', function(data, cb)
     local id = data.id
     TriggerServerEvent('ricky-admin:heal', id)
+    ESX.ShowNotification(Config.Lang[Config.Language]['heal'])
 end)
 
 RegisterNUICallback('revive', function(data, cb)
     local id = data.id
     TriggerServerEvent('ricky-admin:revive', id)
+    ESX.ShowNotification(Config.Lang[Config.Language]['revive'])
 end)
 
 RegisterCommand('noclip', function(source, args, rawCommand)
@@ -369,6 +386,7 @@ RegisterCommand('noclip', function(source, args, rawCommand)
     noclipEnabled = not noclipEnabled 
     local ped = PlayerPedId()
     if noclipEnabled then 
+        ESX.ShowNotification(Config.Lang[Config.Language]['noclip_attivato'])
         ESX.ShowHelpNotification(Config.Lang[Config.Language]['exit_noclip'])
         FreezeEntityPosition(ped, true)
         SetEntityInvincible(ped, true)
@@ -390,6 +408,7 @@ RegisterCommand('noclip', function(source, args, rawCommand)
           }
         TriggerServerEvent('ricky-admin:webhook', 'NoClip', fields, "noclip")
       else
+        ESX.ShowNotification(Config.Lang[Config.Language]['noclip_disattivato'])
         FreezeEntityPosition(ped, false)
         SetEntityInvincible(ped, false)
         SetEntityCollision(ped, true, true)
@@ -424,11 +443,13 @@ end)
 RegisterNUICallback('revocaban', function(data)
     local id = data.id
     TriggerServerEvent('ricky-admin:revocaban', GetPlayerServerId(PlayerId()), id)
+    ESX.ShowNotification(Config.Lang[Config.Language]['revoca_ban'])
 end)
 
 RegisterNUICallback('kill', function(data, cb)
     local id = data.id
     TriggerServerEvent('ricky-admin:kill', id)
+    ESX.ShowNotification(Config.Lang[Config.Language]['kill'])
 end)
 
 RegisterNUICallback('goto', function(data, cb)
@@ -444,11 +465,13 @@ end)
 RegisterNUICallback('wipe', function(data, cb)
     local id = data.id
     TriggerServerEvent('ricky-admin:wipe', id)
+    ESX.ShowNotification(Config.Lang[Config.Language]['wipe'])
 end)
 
 RegisterNUICallback('clearinv', function(data, cb)
     local id = data.id
     TriggerServerEvent('ricky-admin:clearInv', id)
+    ESX.ShowNotification(Config.Lang[Config.Language]['clear_inv2'])
 end)
 
 RegisterNetEvent('ricky-admin:kill')
@@ -464,24 +487,23 @@ end)
 RegisterNetEvent('ricky-admin:updatePlayers')
 AddEventHandler('ricky-admin:updatePlayers', function()
     ESX.TriggerServerCallback('ricky-admin:getPlayers', function(players)
-        ESX.TriggerServerCallback('ricky-admin:getBan', function(ban) 
-            ESX.TriggerServerCallback('ricky-admin:getInfoStaff', function(info)
-                if SonoStaff() == false then return end
-                postMessage({
-                    type = "UPDATE_PLAYERS",
-                    players = players
-                })
-    
-                postMessage({
-                    type = "SET_BAN",
-                    ban = ban
-                })
+        ESX.TriggerServerCallback('ricky-admin:getData', function(data) 
+            if SonoStaff() == false then return end
+            postMessage({
+                type = "UPDATE_PLAYERS",
+                players = players
+            })
 
-                postMessage({
-                    type = "SET_INFO_STAFF",
-                    info = info
-                })
-            end)
+            postMessage({
+                type = "SET_BAN",
+                ban = data.bans
+            })
+
+            postMessage({
+                type = "SET_INFO_STAFF",
+                info = data.infoStaff
+            })
+
         end)
     end)
 end)
@@ -583,6 +605,7 @@ RegisterNUICallback('invisibilita', function()
     invisible = not invisible
     SetNuiFocus(false, false)
     if not invisible then
+        ESX.ShowNotification(Config.Lang[Config.Language]['invisibilita_b'])
         SetEntityVisible(PlayerPedId(), true, 0)
         fields = {
             {
@@ -597,6 +620,7 @@ RegisterNUICallback('invisibilita', function()
             },
           }
     else
+        ESX.ShowNotification(Config.Lang[Config.Language]['invisibilita_a'])
         fields = {
             {
               name = Config.Lang[Config.Language]['nome_staff'],
@@ -617,6 +641,7 @@ local godmode = false
 RegisterNUICallback('godmode', function()
     godmode = not godmode
     if godmode then 
+        ESX.ShowNotification(Config.Lang[Config.Language]['godmode_a'])
          fields = {
             {
               name = Config.Lang[Config.Language]['nome_staff'],
@@ -630,6 +655,7 @@ RegisterNUICallback('godmode', function()
             },
           }
     else
+        ESX.ShowNotification(Config.Lang[Config.Language]['godmode_b'])
          fields = {
             {
               name = Config.Lang[Config.Language]['nome_staff'],
@@ -651,6 +677,7 @@ end)
 RegisterNUICallback('reviveall', function(data, cb)
     SetNuiFocus(false, false)
     TriggerServerEvent('ricky-admin:reviveall')
+    ESX.ShowNotification(Config.Lang[Config.Language]['revive_all'])
 end)
 
 RegisterNetEvent('ricky-admin:announce')
@@ -721,6 +748,7 @@ end
 RegisterNUICallback('nomiplayer', function()
     nomiTesta = not nomiTesta
     if nomiTesta then 
+        ESX.ShowNotification(Config.Lang[Config.Language]["nomitesta_a"])
         fields = {
             {
               name = Config.Lang[Config.Language]['nome_staff'],
@@ -734,6 +762,7 @@ RegisterNUICallback('nomiplayer', function()
             },
           }
     else
+        ESX.ShowNotification(Config.Lang[Config.Language]["nomitesta_b"])
         fields = {
             {
               name = Config.Lang[Config.Language]['nome_staff'],
