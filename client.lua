@@ -102,66 +102,73 @@ CreateThread(function()
         ESX.TriggerServerCallback('ricky-admin:getPlayers', function(t)
             players = t
         end)
-        Wait(30000)
+        postMessage({
+            type = "UPDATE_PLAYERS",
+            players = players
+        })
+        Wait(5000)
     end
 end)
 
 OpenAdminMenu = function()
-    ESX.TriggerServerCallback('ricky-admin:getData', function(data)
-        if SonoStaff() == false then return end
-        SetNuiFocus(true, true)
-        postMessage({
-            type = "SET_RADIUS",
-            radius = Config.ClearAreaRadius
-        })
-        postMessage({
-            type = "SET_ADMIN_ONLINE",
-            admin = data.adminOnline
-        })
-        postMessage({
-            type = "SET_KICKS",
-            kicks = data.kicks
-        })
-        postMessage({
-            type = "SET_CONFIG",
-            config = Config
-        })
-        postMessage({
-            type = "SET_BAN",
-            ban = data.bans
-        })
-        postMessage({
-            type = "SET_INFO_STAFF",
-            info = data.infoStaff
-        })
-        postMessage({
-            type = "SET_JOBS",
-            jobs = data.jobs
-        })
-        postMessage({
-            type = "SET_ADMIN_GROUPS",
-            groups = Config.AdminGroup
-        })
-        postMessage({
-            type = "SET_ORARIO",
-            orario = data.orario
-        })
-        postMessage({
-            type = "SET_AZIONI",
-            azioni = Config.Azioni
-        })
-        postMessage({
-            type = "SET_AZIONI_PERSONALE",
-            azioni = Config.AzioniPersonale
-        })
-        postMessage({
-            type = "OPEN",
-            players = players
-        })
-        postMessage({
-            type = "SET_SERVER_LOGO",
-            logo = Config.LogoServer
-        })
+    ESX.TriggerServerCallback('ricky-admin:getPlayers', function(t)
+        ESX.TriggerServerCallback('ricky-admin:getData', function(data)
+            if SonoStaff() == false then return end
+            SetNuiFocus(true, true)
+            players = t
+            postMessage({
+                type = "SET_RADIUS",
+                radius = Config.ClearAreaRadius
+            })
+            postMessage({
+                type = "SET_ADMIN_ONLINE",
+                admin = data.adminOnline
+            })
+            postMessage({
+                type = "SET_KICKS",
+                kicks = data.kicks
+            })
+            postMessage({
+                type = "SET_CONFIG",
+                config = Config
+            })
+            postMessage({
+                type = "SET_BAN",
+                ban = data.bans
+            })
+            postMessage({
+                type = "SET_INFO_STAFF",
+                info = data.infoStaff
+            })
+            postMessage({
+                type = "SET_JOBS",
+                jobs = data.jobs
+            })
+            postMessage({
+                type = "SET_ADMIN_GROUPS",
+                groups = Config.AdminGroup
+            })
+            postMessage({
+                type = "SET_ORARIO",
+                orario = data.orario
+            })
+            postMessage({
+                type = "SET_AZIONI",
+                azioni = Config.Azioni
+            })
+            postMessage({
+                type = "SET_AZIONI_PERSONALE",
+                azioni = Config.AzioniPersonale
+            })
+            postMessage({
+                type = "OPEN",
+                players = players
+            })
+            postMessage({
+                type = "SET_SERVER_LOGO",
+                logo = Config.LogoServer
+            })
+        end)
     end)
 end
 
@@ -621,6 +628,7 @@ RegisterNUICallback('invisibilita', function()
           }
     else
         ESX.ShowNotification(Config.Lang[Config.Language]['invisibilita_a'])
+        SetEntityVisible(PlayerPedId(), false, 0)
         fields = {
             {
               name = Config.Lang[Config.Language]['nome_staff'],
@@ -697,17 +705,17 @@ Citizen.CreateThread(function()
      end
   end)
 
-Citizen.CreateThread(function()
-  while true do
-    if invisible or noclipEnabled then 
-        Wait(0)
-        SetEntityVisible(PlayerPedId(), false, 0)
-    else
-        Wait(1000)
-        SetEntityVisible(PlayerPedId(), true, 0)
-    end
-   end
-end)
+-- Citizen.CreateThread(function()
+--   while true do
+--     if invisible or noclipEnabled then 
+--         Wait(0)
+--         SetEntityVisible(PlayerPedId(), false, 0)
+--     else
+--         Wait(1000)
+--         SetEntityVisible(PlayerPedId(), true, 0)
+--     end
+--    end
+-- end)
 
 Citizen.CreateThread(function()
   while true do
