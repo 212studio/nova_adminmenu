@@ -1324,8 +1324,8 @@ AddEventHandler('ricky-admin:wipe', function(id)
   for k,v in pairs(Config.WipeSettings) do 
     for a,b in pairs(v) do 
 
-        MySQL.Sync.execute('DELETE FROM '..k..' WHERE '..b..' = @identifier',{
-          ['@identifier'] = GetLicense(target.source, "license"),
+        MySQL.Sync.execute('DELETE FROM '..b..' WHERE '..k..' = @identifier',{
+          ['@identifier'] = target.identifier,
         })
     end
   end
