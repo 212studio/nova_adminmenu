@@ -761,6 +761,8 @@ AddEventHandler('ricky-admin:action', function(data)
     end
   elseif data.action == 'adminjail' then
     local reason = value1
+
+    print(target)
     
     if target then 
 
@@ -1094,7 +1096,6 @@ RegisterServerEvent('ricky-admin:skinmenu')
 AddEventHandler('ricky-admin:skinmenu', function(id)
   local src = source
   local staff = ESX.GetPlayerFromId(src)
-  print(id)
   TriggerClientEvent(Config.Trigger.skin, id)
   local target = ESX.GetPlayerFromId(id)
 
