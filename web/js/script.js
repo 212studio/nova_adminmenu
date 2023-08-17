@@ -199,7 +199,6 @@ const app = new Vue({
             } else {
                 var link = this.playerSelected.avatar
             }
-            console.log(link)
             return {
                 backgroundImage: 'url("'+link+'")'
             }
@@ -394,48 +393,56 @@ const app = new Vue({
                 })
                 $("#app").fadeOut(500)
                 this.playerSelected = false
+                this.postMessage('close')
             } else if(id == 'heal') {
                 this.postMessage('heal', {
                     id : this.playerSelected.id
                 })
                 $("#app").fadeOut(500)
                 this.playerSelected = false
+                this.postMessage('close')
             } else if(id == 'kill') {
                 this.postMessage('kill', {
                     id : this.playerSelected.id
                 })
                 $("#app").fadeOut(500)
                 this.playerSelected = false
+                this.postMessage('close')
             } else if(id == 'goto') {
                 this.postMessage('goto', {
                     id : this.playerSelected.id
                 })
                 $("#app").fadeOut(500)
                 this.playerSelected = false
+                this.postMessage('close')
             } else if(id == 'bring') {
                 this.postMessage('bring', {
                     id : this.playerSelected.id
                 })
                 $("#app").fadeOut(500)
                 this.playerSelected = false
+                this.postMessage('close')
             } else if(id == 'clearinventory') {
                 this.postMessage('clearinv', {
                     id : this.playerSelected.id
                 })
                 $("#app").fadeOut(500)
                 this.playerSelected = false
+                this.postMessage('close')
             } else if(id == 'unjail') {
                 this.postMessage('unjail', {
                     id : this.playerSelected.id
                 })
                 $("#app").fadeOut(500)
                 this.playerSelected = false
+                this.postMessage('close')
             } else if(id == 'wipe') {
                 this.postMessage('wipe', {
                     id : this.playerSelected.id
                 })
                 $("#app").fadeOut(500)
                 this.playerSelected = false
+                this.postMessage('close')
             } else if(id == "giveadmin") {
                 this.questionInfo = {
                     title : this.config.lang.giveadmin,
@@ -472,12 +479,14 @@ const app = new Vue({
                 })
                 $("#app").fadeOut(500)
                 this.playerSelected = false
+                this.postMessage('close')
             } else if(id == "sfreeze") {
                 this.postMessage('sfreeze', {
                     id : this.playerSelected.id
                 })
                 $("#app").fadeOut(500)
                 this.playerSelected = false
+                this.postMessage('close')
             } else if(id == "noclip") {
                 this.playerSelected = false
                 $("#app").fadeOut(500)
@@ -535,10 +544,16 @@ const app = new Vue({
                 this.viewDoubleInput(true)
             } else if(id == "repairvehicle") {
                 this.postMessage('repairvehicle')
+                $("#app").fadeOut(500)
+                this.playerSelected = false
+                this.postMessage('close')
             }else if(id == "clearped") {
                 this.postMessage('clearped', {
                     id : this.playerSelected.id
                 })
+                $("#app").fadeOut(500)
+                this.playerSelected = false
+                this.postMessage('close')
             } else if(id =="nomiplayer") {
                 $("#app").fadeOut(500)
                 this.postMessage("close")
@@ -569,6 +584,9 @@ const app = new Vue({
                 id : this.playerSelected.id
             })
             this.closeQuestion()
+            $("#app").fadeOut(500)
+            this.playerSelected = false
+            this.postMessage('close')
         },
 
         updatePlayers(players) {
