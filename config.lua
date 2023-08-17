@@ -526,7 +526,30 @@ Config.Lang = {
         ['veicolo'] = "Vehicle",
         ['ripara_veicolo'] = "Repair Vehicle",
         ['clear_area'] = "Clear Area",
-        ['exit_noclip'] = "Press ~INPUT_23B4087C~ to exit noclip"
+        ['exit_noclip'] = "Press ~INPUT_23B4087C~ to exit noclip",
+
+        ['noclip_attivato'] = "NoClip Activated",
+        ['noclip_disattivato'] = "NoClip Disabled",
+        ['revive'] = "You have successfully revived!",
+        ['heal'] = "You have successfully healed!",
+        ['clear_ped'] = "Your ped has been cleared successfully",
+        ['clear_ped2'] = "You have cleared the ped successfully",
+        ['clear_area2'] = "You have cleared the area successfully",
+        ['repair_vehicle2'] = "You have successfully repaired the vehicle",
+        ['delete_warn'] = "You have deleted the warn",
+        ['nomitesta_a'] = "You have activated headnames",
+        ['nomitesta_b'] = "You have deactivated the names on the head",
+        ['revoca_ban'] = "You have revoked the ban",
+        ['kill'] = "You have killed the player",
+        ['wipe'] = "You have wiped the player",
+        ['clear_inv2'] = "You have cleared the player\'s inventory",
+        ['jailato'] = "You have jailed the player",
+        ['unjailato'] = "You have released the player",
+        ['invisibilita_a'] = "You have invisibility activated",
+        ['invisibilita_b'] = "You have disabled invisibility",
+        ['godmode_a'] = "You have activated godmode",
+        ['godmode_b'] = "You have disabled godmode",
+        ['revive_all'] = "You have cured all"
     }
 }
 
