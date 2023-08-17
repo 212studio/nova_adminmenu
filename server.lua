@@ -78,6 +78,7 @@ GetPlayerAvatar = function(id)
     url = "https://cdn.discordapp.com/avatars/" .. userData.id .. "/" .. avatar .. ".png"
 else
     print("Errore nella richiesta HTTP: "..errorCode)
+    url = ""
 end
 end, "GET", "", {Authorization = "Bot "..ConfigServer.Token})
 
@@ -138,6 +139,17 @@ GetJail = function(xPlayer)
   else
     return json.decode(result[1].jail)
   end
+end
+
+local function getBans()
+  local ban = LoadResourceFile(GetCurrentResourceName(), 'ban.json')
+  if ban == nil then
+    return {}
+  end
+
+  local ban2 = json.decode(ban)
+
+  return ban2
 end
 
 getPlayers = function()
@@ -250,6 +262,146 @@ GetStaffWarn = function(xPlayer)
   return warns
 end
 
+local function getJobs()
+  local jobs = {}
+  local esxJobs = ESX.GetJobs()
+  for k, v in pairs(esxJobs) do
+    table.insert(jobs, {
+      label = v.label,
+      value = v.name,
+    })
+  end
+
+  return jobs
+end
+
+
+local function getInfoStaff(source)
+  local xPlayer = ESX.GetPlayerFromId(source)
+  local rankLabel = Config.AdminGroup[xPlayer.getGroup()]
+  if rankLabel == nil then
+    rankLabel = Config.Lang[Config.Language]['utente']
+  else
+    rankLabel = rankLabel.label
+  end
+  local info = {
+    name = GetPlayerName(xPlayer.source),
+    id = xPlayer.source,
+    staff = SonoStaff(xPlayer),
+    job = xPlayer.getJob(),
+    rank = getRank(xPlayer.source),
+    rankLabel = rankLabel,
+    avatar = GetPlayerAvatar(xPlayer.source),
+    ban = GetStaffBan(xPlayer),
+    kick = GetStaffKick(xPlayer),
+    jail = GetStaffJail(xPlayer),
+    warn = GetStaffWarn(xPlayer),
+    license = {
+      discord = GetLicense(xPlayer.source, "discord") or "N/A",
+      steam = GetLicense(xPlayer.source, "steam") or "N/A",
+      license = GetLicense(xPlayer.source, "license") or "N/A",
+    },
+  }
+  return info
+end
+
+local function getBans()
+  local ban = LoadResourceFile(GetCurrentResourceName(), 'ban.json')
+  if ban == nil then
+    return {}
+  end
+
+  local ban2 = json.decode(ban)
+
+  return ban2
+end
+
+local function getAdminOnline()
+  local xPlayers = ESX.GetExtendedPlayers()
+  local adminOnline = 0
+
+  for _, xPlayer in pairs(xPlayers) do
+    for a, b in pairs(Config.AdminGroup) do
+      if xPlayer.getGroup() == a then
+        adminOnline = adminOnline + 1
+      end
+    end
+  end
+
+  return adminOnline
+end
+
+local function getKicks()
+  local result = MySQL.Sync.fetchAll("SELECT * FROM ricky_admin")
+  local counterKicks = 0
+  for i = 1, #result, 1 do
+    local kick = json.decode(result[i].kick)
+    if kick ~= nil then
+      for a = 1, #kick, 1 do
+        counterKicks = counterKicks + 1
+      end
+    end
+  end
+
+  return counterKicks
+end
+
+getPlayers = function()
+  local xPlayers = ESX.GetExtendedPlayers() 
+  local players = {}
+  for k, xPlayer in pairs(xPlayers) do 
+    local rankLabel = Config.AdminGroup[xPlayer.getGroup()]
+    if rankLabel == nil then 
+      rankLabel = Config.Lang[Config.Language]['utente']
+    else
+      rankLabel = rankLabel.label
+    end
+
+    local freezed = false 
+    if client_var[xPlayer.source] ~= nil then
+      freezed = client_var[xPlayer.source].freeze 
+    end
+      table.insert(players, {
+          name = GetPlayerName(xPlayer.source),
+          id = xPlayer.source,
+          staff = SonoStaff(xPlayer),
+          job = xPlayer.job, 
+          rankLabel = rankLabel,
+          freezed = freezed,
+          license = {
+              discord = GetLicense(xPlayer.source, "discord") or "N/A",
+              steam = GetLicense(xPlayer.source, "steam") or "N/A",
+              license = GetLicense(xPlayer.source, "license") or "N/A",
+          },
+          warn = GetWarn(xPlayer),
+          kick = GetKick(xPlayer),
+          avatar = GetPlayerAvatar(xPlayer.source),
+          ban = GetBan(xPlayer),
+          jail = GetJail(xPlayer),
+          inJail = InJail(xPlayer.source),
+      })
+  end
+  return players
+end
+
+ESX.RegisterServerCallback('ricky-admin:getPlayers', function(source, cb)
+  cb(getPlayers())
+end)
+
+ESX.RegisterServerCallback('ricky-admin:getData', function(source, cb)
+  local data = {}
+
+  data.jobs = getJobs()
+  data.infoStaff = getInfoStaff(source)
+  data.orario = os.date("%H:%M")
+  data.bans = getBans()
+  data.adminOnline = getAdminOnline()
+  data.kicks = getKicks()
+
+
+  cb(data)
+end)
+
 ESX.RegisterServerCallback('ricky-admin:getInfoStaff', function(source, cb)
   local xPlayer = ESX.GetPlayerFromId(source)
   local rankLabel = Config.AdminGroup[xPlayer.getGroup()]
@@ -292,9 +444,6 @@ ESX.RegisterServerCallback('ricky-admin:sonoStaff', function(source, cb)
   cb(SonoStaff(ESX.GetPlayerFromId(source)))
 end)
 
-ESX.RegisterServerCallback('ricky-admin:getPlayers', function(source, cb)
-    cb(getPlayers())
-end)
 
 CheckSql = function(id)
   local xPlayer = ESX.GetPlayerFromId(id)
@@ -1236,18 +1385,18 @@ AddEventHandler('ricky-admin:deletewarn', function(id, index)
 end)
 
 
-ESX.RegisterServerCallback('ricky-admin:getJobs', function(source, cb)
+local function getJobs()
   local jobs = {}
   local esxJobs = ESX.GetJobs()
-  for k,v in pairs(esxJobs) do 
+  for k, v in pairs(esxJobs) do
     table.insert(jobs, {
       label = v.label,
       value = v.name,
     })
   end
 
-  cb(jobs)
-end)
+  return jobs
+end
 
 ESX.RegisterServerCallback('ricky-admin:getOrario', function(source, cb)
   local hour = os.date("%H:%M")
@@ -1351,18 +1500,6 @@ AddEventHandler('ricky-admin:sfreeze', function(id)
   TriggerClientEvent('ricky-admin:updatePlayers', -1)
 end)
 
-
-ESX.RegisterServerCallback('ricky-admin:getBan', function(source, cb)
-  local ban = LoadResourceFile(GetCurrentResourceName(), 'ban.json')
-  if ban == nil then 
-    return {}
-  end
-
-  local ban2 = json.decode(ban)
-
-  cb(ban2)
-end)
-
 RegisterServerEvent('ricky-admin:revocaban')
 AddEventHandler('ricky-admin:revocaban', function(staffId, id)
   UnBan(id)
@@ -1396,19 +1533,20 @@ AddEventHandler('ricky-admin:revocaban', function(staffId, id)
   sendWebhook("REVOCA BAN", fields, ConfigServer.Webhook.ban)
 end)
 
-ESX.RegisterServerCallback('ricky-admin:getAdminOnline', function(source, cb)
+local function getAdminOnline()
   local xPlayers = ESX.GetExtendedPlayers()
   local adminOnline = 0
 
-  for _, xPlayer in pairs(xPlayers) do 
-    for a,b in pairs(Config.AdminGroup) do 
-       if xPlayer.getGroup() == a then 
+  for _, xPlayer in pairs(xPlayers) do
+    for a, b in pairs(Config.AdminGroup) do
+      if xPlayer.getGroup() == a then
         adminOnline = adminOnline + 1
-       end
+      end
     end
   end
-  cb(adminOnline)
-end)
+
+  return adminOnline
+end
 
 RegisterServerEvent('ricky-admin:reviveall')
 AddEventHandler('ricky-admin:reviveall', function()
